@@ -12,4 +12,5 @@ setuptools.setup(
         'numpy',                    # 1.19.2
 	'opencv-python',            # 4.4.0.44
         'astropy.convolution'       # 4.0.3
+    ]
 )
