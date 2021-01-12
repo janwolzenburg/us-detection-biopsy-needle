@@ -39,4 +39,4 @@ Biopsy needle detection with ultrasonic imaging and a program run on a Raspberry
 		<li>Start the scripts realtime_process.py andshow_frames.py in this order</li>
 		<li>Review the results and change processing parameters if necessary</li>
 	</ol>
-	For testing purposes previously recorded images can be processesed. Comment all lines in realtime_process.py which handle the video grabber and use cv2.imread() to read images from the specified location. An example can be seen in the code after the start of the section "Repeatet steps". Also the angle has to be considered for testing. In parameters.py angles[1] is the default angle, when to hardware interaction is present.
+	For testing purposes previously recorded images can be processesed. Comment all lines in realtime_process.py which handle the video grabber and use cv2.imread() to read images from the specified location. An example can be seen in the code after the start of the section "Repeatet steps". Also the angle has to be considered for testing. In parameters.py angles[1] is the default angle, when no hardware interaction is present.
