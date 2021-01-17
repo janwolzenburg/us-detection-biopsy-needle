@@ -1,7 +1,7 @@
 #########################################################################################
 #   Author:         Jan Wolzenburg @ Fachhochschule Südwestfalen (Lüdenscheid, Germany) #
-#   Date:           12.01.2020                                                          #
-#   Version:        2.1                                                                 #
+#   Date:           17.01.2020                                                          #
+#   Version:        2.2                                                                 #
 #   Description:    Needle detection in continueous US-image stream                     #
 #########################################################################################
 
