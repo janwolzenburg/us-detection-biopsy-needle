@@ -1,7 +1,7 @@
 #########################################################################################
 #   Author:         Jan Wolzenburg @ Fachhochschule Südwestfalen (Lüdenscheid, Germany) #
-#   Date:           12.01.2020                                                          #
-#   Version:        2.1                                                                 #
+#   Date:           17.01.2020                                                          #
+#   Version:        2.2                                                                 #
 #   Description:    Needle detection in continueous US-image stream                     #
 #########################################################################################
 
@@ -62,6 +62,7 @@ try:
                 # If input is low the expected angle is updated
                 if gpio.input(p.channels[c]) == gpio.LOW:
                     expected_angle = p.angles[c - 1]
+                    insertion_depth = p.insertion_depths[c - 1]
                     print("Angle set to ", expected_angle)
                     new_angle = 1
                     break
@@ -101,7 +102,7 @@ try:
 
             # Probing lines
             # b -> Pixel value where the needle enters the cropped picture
-            expected_b = round(p.insertion_depth/dist_per_pixel*rescale_factor) # expected pixel value where the needle enters the frame
+            expected_b = round(insertion_depth/dist_per_pixel*rescale_factor) # expected pixel value where the needle enters the frame
             b_range = int(height/16)                                            # pixel range for probing lines
             angle_range = 5/360*m.pi*2                                          # angle range for probing lines
 
