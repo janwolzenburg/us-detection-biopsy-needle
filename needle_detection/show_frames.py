@@ -1,15 +1,6 @@
-#########################################################################################
-#   Author:         Jan Wolzenburg @ Fachhochschule Südwestfalen (Lüdenscheid, Germany) #
-#   Date:           12.01.2020                                                          #
-#   Version:        2.1                                                                 #
-#   Description:    Needle detection in continueous US-image stream                     #
-#########################################################################################
-
-# Modules
 import numpy as np
-import matplotlib.pyplot as mplpp
-import matplotlib.image as mpimg
-import parameters as p
+import matplotlib.pyplot as plt
+import parameters as p ##hier auch später umschreiben als klasse
 import time
 
 # Load initialisation image
@@ -19,10 +10,10 @@ file.close()
 frame_raw = np.load("./saved_frames/"+str(frame_ptr)+".npy")
      
 # Prepare plot canvas
-fig, ax = mplpp.subplots()
+fig, ax = plt.subplots()
 im = ax.imshow(frame_raw, cmap='gray', animated=True)
-mplpp.show(block=False)
-mplpp.pause(0.5)
+plt.show(block=False)
+plt.pause(0.5)
 bg = fig.canvas.copy_from_bbox(fig.bbox)
 ax.draw_artist(im)
 fig.canvas.blit(fig.bbox)

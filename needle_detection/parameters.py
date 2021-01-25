@@ -1,10 +1,3 @@
-#########################################################################################
-#   Author:         Jan Wolzenburg @ Fachhochschule Südwestfalen (Lüdenscheid, Germany) #
-#   Date:           17.01.2020                                                          #
-#   Version:        2.2                                                                 #
-#   Description:    Needle detection in continueous US-image stream                     #
-#########################################################################################
-
 # Image properties
 #image_path = './resources/single_frames/';                  
 #frames = ['40.png','35.png','45.png','63.png','69.png','74.png']

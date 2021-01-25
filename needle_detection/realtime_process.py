@@ -1,13 +1,3 @@
-#########################################################################################
-#   Author:         Jan Wolzenburg @ Fachhochschule Südwestfalen (Lüdenscheid, Germany) #
-#   Date:           17.01.2020                                                          #
-#   Version:        2.2                                                                 #
-#   Description:    Needle detection in continueous US-image stream                     #
-#########################################################################################
-
-
-################################################
-# Modules
 import RPi.GPIO as gpio
 
 import math as m
@@ -15,17 +5,10 @@ import numpy as np
 
 import cv2
 
-import scipy.ndimage as spimg
+from scipy import ndimage, draw, transform
 
-import skimage.draw as skdw
-import skimage.transform as sktr
-
-import matplotlib.image as matimg
-import matplotlib.pyplot as mplpp
-import matplotlib as mpl
-
-import functions as f
-import parameters as p
+from needle_detection.functions import build_gauss_kernel,build_sobel_kernel,build_probe_lines, normal, find_tip, get_draw_line
+import parameters as p  ##das hier noch als klasse schreiben
 
 import time
 
@@ -115,17 +98,17 @@ try:
             # Initialisation
 
             # Build Gauss filter kernel
-            kernel = f.build_gauss_kernel(sigma_x, sigma_y, expected_angle)
+            kernel = build_gauss_kernel(sigma_x, sigma_y, expected_angle)
             print("Gaussian filter kernel build!")
 
             # Build rotated Sobel
-            sob_kernel = f.build_sobel_kernel(sob_kernel_size, expected_angle);
+            sob_kernel =build_sobel_kernel(sob_kernel_size, expected_angle);
             print("Sobel filter build!")
-            kernel = spimg.convolve(kernel, sob_kernel)                         # Convolve Kernels
+            kernel = ndimage.convolve(kernel, sob_kernel)                         # Convolve Kernels
             print("Kernels convolved! Size:", kernel.shape[1], " x ", kernel.shape[0])
 
             # Build probing lines
-            prob_lines, num_prob_lines, all_bs, all_ms, delta_b, y_pts, line_lengths, x_limits = f.build_probe_lines(expected_angle, angle_range, p.num_angles, expected_b, b_range, p.num_bs, p.line_wdt, width, height)
+            prob_lines, num_prob_lines, all_bs, all_ms, delta_b, y_pts, line_lengths, x_limits =build_probe_lines(expected_angle, angle_range, p.num_angles, expected_b, b_range, p.num_bs, p.line_wdt, width, height)
             score = np.empty([num_prob_lines])
             print("Probing lines build! Amount:", num_prob_lines)
             
@@ -146,12 +129,12 @@ try:
             frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
             
             frame_raw = frame[p.roi_y_1:p.roi_y_2, p.roi_x_1:p.roi_x_2]
-            frame_roi = sktr.resize(frame_raw, (height, width))
+            frame_roi = transform.resize(frame_raw, (height, width))
             
             # Apply filters
-            frame_filtered = spimg.convolve(frame_roi, kernel)
+            frame_filtered = ndimage.convolve(frame_roi, kernel)
             # Normalize
-            frame_filtered = f.normal(frame_filtered, np.uint8)
+            frame_filtered = normal(frame_filtered, np.uint8)
             
             # Line probing
             for j in range(0, num_prob_lines):
@@ -167,17 +150,17 @@ try:
             if score[score_max_idx] >= score_ref:
             
                 # Find needle tip
-                diff_min_x, diff_min_y = f.find_tip(frame_filtered, prob_lines[score_max_idx], window_size, width, y_pts, delta_b)
+                diff_min_x, diff_min_y = find_tip(frame_filtered, prob_lines[score_max_idx], window_size, width, y_pts, delta_b)
 
                 # line
                 line_b = round(all_bs[score_max_idx]/rescale_factor)
                 line_m = all_ms[score_max_idx]
-                line_y, line_x = f.get_draw_line(line_b, line_m, frame_raw.shape)
+                line_y, line_x = get_draw_line(line_b, line_m, frame_raw.shape)
                 
                 # tip
                 tip_x = int(round(diff_min_x/rescale_factor))
                 tip_y = int(round(diff_min_y/rescale_factor))
-                circle_y, circle_x = skdw.disk([tip_y, tip_x], 12)
+                circle_y, circle_x = draw.disk([tip_y, tip_x], 12)
                           
                 # Draw
                 for t in range(-3, 3):

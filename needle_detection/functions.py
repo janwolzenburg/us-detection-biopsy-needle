@@ -1,19 +1,11 @@
-#########################################################################################
-#   Author:         Jan Wolzenburg @ Fachhochschule Südwestfalen (Lüdenscheid, Germany) #
-#   Date:           12.01.2020                                                          #
-#   Version:        2.1                                                                 #
-#   Description:    Needle detection in continueous US-image stream                     #
-#########################################################################################
-
 import math as m
 import numpy as np
 
 import astropy.convolution as ascon
 
-import scipy.ndimage as spimg
-import scipy.signal as spsi
+from scipy import ndimage, signal
 
-import skimage.draw as skdw
+from skimage import draw
 
 ##############################################################################################################
 ##############################################################################################################
@@ -38,7 +30,7 @@ def build_gauss_kernel(sigma_x, sigma_y, angle):
     x_size = kernel.shape[0]; y_size = kernel.shape[1]
     kernel = kernel.array
     # Rotate
-    kernel = spimg.rotate(kernel, -angle/(2*m.pi)*360, reshape=False)
+    kernel = ndimage.rotate(kernel, -angle/(2*m.pi)*360, reshape=False)
 
     # Parameters for cropping
     max_in_kernel = np.amax(abs(kernel))
@@ -83,7 +75,7 @@ def build_sobel_kernel(n, angle):
     sob_kernel = np.zeros([n,n])
     sob_kernel[0:n_3,0:n_3] = 1; sob_kernel[0:n_3,n_3:2*n_3] = 2; sob_kernel[0:n_3,2*n_3:3*n_3] = 1
     sob_kernel[2*n_3:3*n_3,0:n_3] = -1; sob_kernel[2*n_3:3*n_3,n_3:2*n_3] = -2; sob_kernel[2*n_3:3*n_3,2*n_3:3*n_3] = -1 
-    sob_kernel = spimg.rotate(sob_kernel, -angle/(2*m.pi)*360, reshape=False)
+    sob_kernel = ndimage.rotate(sob_kernel, -angle/(2*m.pi)*360, reshape=False)
 
     return sob_kernel
     
@@ -231,7 +223,7 @@ def find_tip(frame, prob_line, window_size, width, y_pts, delta_b):
     # Side length of window
     m = 2*(2*window_size+1)
     # Moving average
-    intensity_along_line = spsi.convolve(intensity_along_line, np.full([m],1/m,dtype=float), mode='same')
+    intensity_along_line = signal.convolve(intensity_along_line, np.full([m],1/m,dtype=float), mode='same')
     
     
     # Fill start and end with nearest value
@@ -285,7 +277,7 @@ def get_draw_line(line_b, line_m, shape):
         x_end = shape[1]-1
         y_end = int(round(line_m*(x_end-x_start) + y_start))
     
-    line_y, line_x = skdw.line(y_start, x_start, y_end, x_end)
+    line_y, line_x = draw.line(y_start, x_start, y_end, x_end)
     
     return line_y, line_x
 
