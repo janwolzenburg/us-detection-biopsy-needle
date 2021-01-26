@@ -3,7 +3,7 @@ Biopsy needle detection with ultrasonic imaging and a program run on a Raspberry
 
 <h2>Important note!</h2>
 <b>
-This code and application are not tested in a clinical context. The code is developed for research purpose only.
+This code and its application are not tested in a clinical context. The code is developed for research purpose only.
 </b>
 
 <ul> <h2>Requirements</h2>
