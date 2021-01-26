@@ -1,6 +1,10 @@
 # us-detection-biopsy-needle
 Biopsy needle detection with ultrasonic imaging and a program run on a Raspberry Pi. <br>Student project at Fachhochschule Südwestfalen in Lüdenscheid, Germany
 
+<h2>Important note!</h2>
+<b>
+This code and application are not tested in a clinical context. The code is developed for research purpose only.
+</b>
 
 <ul> <h2>Requirements</h2>
 	<li> Hardware
