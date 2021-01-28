@@ -1,18 +1,21 @@
-import RPi.GPIO as gpio
+#import RPi.GPIO as gpio
 
 import math as m
 import numpy as np
 
 import cv2
 
-from scipy import ndimage, draw, transform
+from scipy import ndimage spatial
+from skimage import draw
 
-from needle_detection.functions import build_gauss_kernel,build_sobel_kernel,build_probe_lines, normal, find_tip, get_draw_line
+from needle_detection.kernels import build_gauss_kernel,build_sobel_kernel
+from needle_detection.line_detection import  build_probe_lines
+from needle_detection.preprocessing import  normal
+from needle_detection.tip_detection import find_tip
+from needle_detection.plotting import get_draw_line
 import parameters as p  ##das hier noch als klasse schreiben
 
 import time
-
-print("Modules loaded!");
 
 try:
     expected_angle = p.angles[1]
@@ -21,9 +24,9 @@ try:
     new_angle = 1
     
     # Stup GPIO for holder angles
-    gpio.setmode(GPIO.BOARD)
-    gpio.setup(p.channels, GPIO.IN, pull_up_down=GPIO.PUD_UP)
-    gpio.add_event_detect(p.channels[0], GPIO.FALLING,  bouncetime=200)
+    gpio.setmode(gpio.BOARD)
+    gpio.setup(p.channels, gpio.IN, pull_up_down=gpio.PUD_UP)
+    gpio.add_event_detect(p.channels[0], gpio.FALLING,  bouncetime=200)
     print("Set up input channels")
     
     ################################################
@@ -45,7 +48,7 @@ try:
                 # If input is low the expected angle is updated
                 if gpio.input(p.channels[c]) == gpio.LOW:
                     expected_angle = p.angles[c - 1]
-                    insertion_depth = p.insertion_depths[c - 1]
+                    insertion_depth = p.insertion_depths[c - 1] 
                     print("Angle set to ", expected_angle)
                     new_angle = 1
                     break
@@ -85,7 +88,7 @@ try:
 
             # Probing lines
             # b -> Pixel value where the needle enters the cropped picture
-            expected_b = round(insertion_depth/dist_per_pixel*rescale_factor) # expected pixel value where the needle enters the frame
+            expected_b = round(p.insertion_depths[c - 1] /dist_per_pixel*rescale_factor) # expected pixel value where the needle enters the frame
             b_range = int(height/16)                                            # pixel range for probing lines
             angle_range = 5/360*m.pi*2                                          # angle range for probing lines
 
@@ -129,7 +132,7 @@ try:
             frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
             
             frame_raw = frame[p.roi_y_1:p.roi_y_2, p.roi_x_1:p.roi_x_2]
-            frame_roi = transform.resize(frame_raw, (height, width))
+            frame_roi = spatial.transform.resize(frame_raw, (height, width))
             
             # Apply filters
             frame_filtered = ndimage.convolve(frame_roi, kernel)
