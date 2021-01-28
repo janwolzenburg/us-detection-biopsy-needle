@@ -12,7 +12,6 @@ import parameters as p  ##das hier noch als klasse schreiben
 
 import time
 
-print("Modules loaded!");
 
 try:
     expected_angle = p.angles[1]
@@ -21,9 +20,9 @@ try:
     new_angle = 1
     
     # Stup GPIO for holder angles
-    gpio.setmode(GPIO.BOARD)
-    gpio.setup(p.channels, GPIO.IN, pull_up_down=GPIO.PUD_UP)
-    gpio.add_event_detect(p.channels[0], GPIO.FALLING,  bouncetime=200)
+    gpio.setmode(gpio.BOARD)
+    gpio.setup(p.channels, gpio.IN, pull_up_down=gpio.PUD_UP)
+    gpio.add_event_detect(p.channels[0], gpio.FALLING,  bouncetime=200)
     print("Set up input channels")
     
     ################################################
@@ -45,7 +44,7 @@ try:
                 # If input is low the expected angle is updated
                 if gpio.input(p.channels[c]) == gpio.LOW:
                     expected_angle = p.angles[c - 1]
-                    insertion_depth = p.insertion_depths[c - 1]
+                    insertion_depth = p.insertion_depths[c - 1]  ##wenn der if case nicht auftritt fehlt die Definition weiter unten
                     print("Angle set to ", expected_angle)
                     new_angle = 1
                     break
