@@ -16,7 +16,15 @@ arguments
 returns
     line_y  array with y-values
     line_x  array with x-values
-    
+    score = np.empty([num_prob_lines])
+
+frame_empty = np.zeros([height, width])
+for i in range(0, num_prob_lines):
+    frame_empty[prob_lines[i][1][:],prob_lines[i][0][:]] = 1
+
+fig_lines = plt.figure()
+frame_lines_axes = fig_lines.add_axes([0,0,1,1])
+frame_lines_axes.imshow(frame_empty, cmap='gray')
 """
 def get_draw_line(line_b, line_m, shape):
 
@@ -38,3 +46,14 @@ def get_draw_line(line_b, line_m, shape):
     
     return line_y, line_x
 
+
+
+def plotting_tip(diff_min_x, diff_min_y):
+    tip_x = int(round(diff_min_x/rescale_factor))
+    tip_y = int(round(diff_min_y/rescale_factor))
+
+    circle_y, circle_x = disk([tip_y, tip_x], 12)
+    frame_raw[circle_y, circle_x] = 1
+    return 
+
+    def plot_lines()

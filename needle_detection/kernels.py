@@ -2,6 +2,8 @@ import numpy as np
 import astropy.convolution as ascon
 from scipy import ndimage, signal
 from skimage import draw
+import needle_detection.parameters as p
+from needle_detection.preprocessing import normal
 
 """
 description
@@ -23,7 +25,7 @@ def build_gauss_kernel(sigma_x, sigma_y, angle):
     x_size = kernel.shape[0]; y_size = kernel.shape[1]
     kernel = kernel.array
     # Rotate
-    kernel = ndimage.rotate(kernel, -angle/(2*np.pi)*360, reshape=False)
+    kernel = ndimage.rotate(kernel,np.rad2deg(-angle), reshape=False)
 
     # Parameters for cropping
     max_in_kernel = np.amax(abs(kernel))
@@ -68,9 +70,32 @@ def build_sobel_kernel(n, angle):
     sob_kernel = np.zeros([n,n])
     sob_kernel[0:n_3,0:n_3] = 1; sob_kernel[0:n_3,n_3:2*n_3] = 2; sob_kernel[0:n_3,2*n_3:3*n_3] = 1
     sob_kernel[2*n_3:3*n_3,0:n_3] = -1; sob_kernel[2*n_3:3*n_3,n_3:2*n_3] = -2; sob_kernel[2*n_3:3*n_3,2*n_3:3*n_3] = -1 
-    sob_kernel = ndimage.rotate(sob_kernel, -angle/(2*np.pi)*360, reshape=False)
+    sob_kernel = ndimage.rotate(sob_kernel, np.rad2deg(-angle), reshape=False)
 
     return sob_kernel
     
 ##############################################################################################################
 ##############################################################################################################
+
+
+def filtering(frame, kernel):
+    frame = ndimage.convolve(frame, kernel)
+    frame = normal(frame, np.uint8)
+    return frame
+
+
+def convolve_kernels(kernel_1, kernel_2):
+    #kernel = build_gauss_kernel(sigma_x, sigma_y, expected_angle)
+
+    # Build rotated Sobel
+    #sob_kernel = build_sobel_kernel(sob_kernel_size, expected_angle);
+    kernel = ndimage.convolve(kernel_1, kernel_2)
+    return kernel
+
+
+def filter_kernel_parameters(frame, value=12):
+    wdt_hgt_ref = np.sqrt((np.shape(frame)[0])**2+(np.shape(frame)[1])**2)
+    sigma_x = wdt_hgt_ref/75                                            # Sigma x of gaussian kernel
+    sigma_y = sigma_x/p.kernel_aspect_ratio                             # Sigma y
+    sob_kernel_size = int(value)   
+    return sigma_x, sigma_y, sob_kernel_size

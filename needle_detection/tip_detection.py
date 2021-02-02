@@ -49,7 +49,7 @@ def find_tip(frame, prob_line, window_size, width, y_pts, delta_b):
     for l in range(width-window_size-1, width):
        intensity_along_line[l] = intensity_along_line[width-window_size-1]  
     
-    # Differenciate and locate needle tip. The minimum in der derivative of the intesity along the line is considered to be the needle tip
+    # Differenciate and locate needle tip. The minimum in the derivative of the intesity along the line is considered to be the needle tip
     difference = np.diff(intensity_along_line, 1)
     intensity_along_line_diff = np.append(difference[0], difference)
     diff_min_idx = np.argmin(intensity_along_line_diff)

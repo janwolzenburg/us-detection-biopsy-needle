@@ -1,6 +1,5 @@
 # Image properties
-#image_path = './resources/single_frames/';                  
-#frames = ['40.png','35.png','45.png','63.png','69.png','74.png']
+
 status_path = "./saved_frames/status"
 
 image_size_x = 960; image_size_y = 1280                     # size of grabbed frames
@@ -29,3 +28,17 @@ score_thres = 1.2                                           # Threshold factor f
 
 # tip detection
 window_size_div = 50                                        # divider for side length of moving window
+angle_range = 5
+
+
+
+#class logiqc5
+#    linear_array
+#    curved_array
+
+
+#class image
+#    holds image data
+
+#class needle_guidance
+    
