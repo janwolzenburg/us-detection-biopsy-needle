@@ -27,7 +27,7 @@ This code and its application are not tested in a clinical context. The code is 
 			<li>RPi.GPIO</li>
 		</ul>
 	</li>
-	
+
 The package can be downloaded and installed with following commands:
 ```
 $ git clone git@github.com:tudo-astroparticlephysics/all_sky_cloud_detection.git
@@ -35,7 +35,7 @@ $ cd all_sky_cloud_detection/
 $ pip install .
 ```
 
-	<h2>File descriptions</h2>
+<h2>File descriptions</h2>
 	<h3>parameters.py</h3>
 	This file holds the necessary variables for image processing and handling. For each system and transducer the image and needle holder properties have to be refreshed. The other parameters affect mostly the processing of a frame for needle processing.
 	<h3>functions.py</h3>
