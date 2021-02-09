@@ -18,7 +18,7 @@ returns
     kernel      roteted filter kernel
 """
 def build_gauss_kernel(sigma_x, sigma_y, angle):
-    
+    angle = np.pi/2-np.deg2rad(angle)  
     # Calculate gaussian kernel
     kernel = ascon.Gaussian2DKernel(sigma_x, sigma_y, 0)
     # Extract size and kernel values
@@ -65,7 +65,7 @@ returns
     
 """
 def build_sobel_kernel(n, angle):
-    
+    np.pi/2-np.deg2rad(angle)  
     n_3 = int(n/3)
     sob_kernel = np.zeros([n,n])
     sob_kernel[0:n_3,0:n_3] = 1; sob_kernel[0:n_3,n_3:2*n_3] = 2; sob_kernel[0:n_3,2*n_3:3*n_3] = 1

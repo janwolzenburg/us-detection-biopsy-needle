@@ -9,11 +9,11 @@ description
     builds the lines for probing.
     
 arguments
-    expected angle      the expected insertion angle with respect to x-axis in degrees
+    angle      the expected insertion angle with respect to x-axis in degrees
     angle range         the angle range in which lines will be build
     num_angles          the amount of lines in range
     
-    expected_b          the expected y-position the needle enteres the picture (x = 0)
+    expected_b          the expected y-position the needle enters the picture (x = 0)
     b_range             the range of bs
     num_bs              the amount of bs in range
     
@@ -31,11 +31,11 @@ returns
     x_limits            limits where the line enters and exits the ...
     
 """
-def build_probe_lines(frame, expected_angle, rescale_factor):
+def build_probe_lines(frame, angle, rescale_factor):
     # Probing lines
     # b -> Pixel value where the needle enters the picture
+    expected_angle = np.pi/2-np.deg2rad(angle) 
     angle_range = np.deg2rad(p.angle_range)
-    expected_angle = np.deg2rad(expected_angle) #convert to rad
     width = int(np.shape(frame)[1])##das hier nochmal checken
     height = int(np.shape(frame)[0]) ##das hier nochmal checken
     dist_per_pixel = p.depth/height   
@@ -45,13 +45,14 @@ def build_probe_lines(frame, expected_angle, rescale_factor):
     m_stg = np.linspace(np.tan(expected_angle-angle_range),np.tan(expected_angle+angle_range), p.num_angles)
     b = np.linspace(expected_b-b_range, expected_b+b_range, p.num_bs, dtype=int)
 
-    delta_b = int(abs(np.floor((p.line_wdt/2)/np.cos(expected_angle)))) #delta sollte positiv sein deswegen mal abs
+   # delta_b = int(abs(np.floor((p.line_wdt/2)/np.cos(expected_angle)))) #delta sollte positiv sein deswegen mal abs
+    delta_b = int(np.floor((p.line_wdt/2)/np.cos(expected_angle)))
+    
     y_pts = (2*delta_b+1)
 
     num_lines = len(b)*len(m_stg)
     score = np.empty([num_lines])
 
-    print([num_lines,2 ,y_pts])
     prob_lines = np.empty(shape=[num_lines,2 ,y_pts*width], dtype=int) 
     all_bs = np.empty([num_lines])
     all_ms =np.empty([num_lines])
@@ -81,7 +82,7 @@ def build_probe_lines(frame, expected_angle, rescale_factor):
                         prob_lines[line_idx][1][j_idx] = height-1
                         if x_limits[line_idx][1] == 0:
                             x_limits[line_idx][1] = j_idx
-            #print(x_limits[line_idx][1])
+            
             # If exit point is has not been defined
             if x_limits[line_idx][1] == 0:
                 x_limits[line_idx][1] = j_idx
@@ -96,7 +97,7 @@ def build_probe_lines(frame, expected_angle, rescale_factor):
                                              prob_lines[line_idx][1][x_limits[line_idx][0]])**2)
 
             #print(prob_lines[line_idx][0][x_limits[line_idx][-1]], prob_lines[line_idx][0][x_limits[line_idx][0]])                               
-                      
+            
     return prob_lines, num_lines, all_bs, all_ms, delta_b, y_pts, line_lengths, x_limits
     
 ##############################################################################################################
@@ -107,37 +108,41 @@ def build_probe_lines(frame, expected_angle, rescale_factor):
 
 def line_detector(frame_filtered, num_lines, prob_lines, x_limits, line_lengths, y_pts, delta_b, all_bs, rescale_factor, frame_raw):
 
-    #score = np.empty([num_lines])
-    #for j in range(0, num_lines-1):
-    #    score[j] = np.sum(frame_filtered[prob_lines[j][1][x_limits[j][0]:x_limits[j][1]], prob_lines[j][0][x_limits[j][0]:x_limits[j][1]]])/line_lengths[j] 
+    score = np.empty([num_lines])     
+    #frame_filtered: array mit (182, 200)
+    #num_lines: int 64
+    #prob lines: array mit (64, 2, 3840) → prob_lines[0]: array aus 2 arrays (shape 2, 3840), prob_lines[0][1]: array mit 3840
+    #x_limits: array mit (64, 2) → x_limits[0]: [   0 3839], x_limits[0][1]: 3839
+    #line_lengths: (64,) → line_lengths[j] : 1411.8941178431194
 
-    score = np.array([np.sum(frame_filtered[prob_lines[j][1][x_limits[j][0]:x_limits[j][1]], prob_lines[j][0][x_limits[j][0]:x_limits[j][1]]], axis=1)/line_lengths[j] for j in range(0, len(prob_lines))])
-    # Calc minimum score for a line to be drawn. The score reference is based on the average of the values bewteen the second and fourth quintile.
+    for j in range(0, num_lines):
+        score[j] = np.sum(frame_filtered[prob_lines[j][1][x_limits[j][0]:x_limits[j][1]], prob_lines[j][0][x_limits[j][0]:x_limits[j][1]]])/line_lengths[j] 
+
     q = np.quantile(score, [0.2, 0.4, 0.6, 0.8, 1])
     middle_q = score[(score >= q[1]) & (score <= q[3])]
-    score_ref = p.score_thres*np.mean(middle_q)
+    score_ref = p.score_thres*np.mean(middle_q)-20
 
     score_max_idx = np.argmax(score)
-
+    print('ref',score_ref)
+    print(score[score_max_idx])
     if score[score_max_idx] >= score_ref:
         print('yeay')
 
         # Find needle tip
-     #   diff_min_x, diff_min_y = find_tip(frame_filtered, prob_lines[score_max_idx], window_size, width, y_pts, delta_b)
+        diff_min_x, diff_min_y = find_tip(frame_filtered, prob_lines[score_max_idx], window_size, width, y_pts, delta_b)
         # line
-     #   line_b = round(all_bs[score_max_idx]/rescale_factor)
-     #   line_m = all_ms[score_max_idx]
-     #   line_y, line_x = get_draw_line(line_b, line_m, frame_raw.shape)
+        line_b = round(all_bs[score_max_idx]/rescale_factor)
+        line_m = all_ms[score_max_idx]
+        line_y, line_x = get_draw_line(line_b, line_m, frame_raw.shape)
 
         # tip
-     #   tip_x = int(round(diff_min_x/rescale_factor))
-     #   tip_y = int(round(diff_min_y/rescale_factor))
-     #   circle_y, circle_x = draw.disk([tip_y, tip_x], 12)
-
+       # tip_x = int(round(diff_min_x/rescale_factor))
+       # tip_y = int(round(diff_min_y/rescale_factor))
+       # circle_y, circle_x = draw.disk([tip_y, tip_x], 12)
         # Draw
-     #   for t in range(-3, 3):
-     #       frame_raw[line_y+t, line_x] = 255
-     #   frame_raw[circle_y, circle_x] = 255
-     #   print("Found axis and tip in frame", loop_ctr,"with line score of", round(score[score_max_idx],2))
-    #else:
-     #   print("No needle found")
+       # for t in range(-3, 3):
+       #     frame_raw[line_y+t, line_x] = 255
+       # frame_raw[circle_y, circle_x] = 255
+       # print("Found axis and tip in frame", loop_ctr,"with line score of", round(score[score_max_idx],2))
+    else:
+        print("No needle found")
