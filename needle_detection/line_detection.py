@@ -9,7 +9,7 @@ description
     builds the lines for probing.
     
 arguments
-    expected angle      the expected insertion angle with respect to x-axis
+    expected angle      the expected insertion angle with respect to x-axis in degrees
     angle range         the angle range in which lines will be build
     num_angles          the amount of lines in range
     
@@ -35,6 +35,7 @@ def build_probe_lines(frame, expected_angle, rescale_factor):
     # Probing lines
     # b -> Pixel value where the needle enters the picture
     angle_range = np.deg2rad(p.angle_range)
+    expected_angle = np.deg2rad(expected_angle) #convert to rad
     width = int(np.shape(frame)[1])##das hier nochmal checken
     height = int(np.shape(frame)[0]) ##das hier nochmal checken
     dist_per_pixel = p.depth/height   
@@ -43,15 +44,15 @@ def build_probe_lines(frame, expected_angle, rescale_factor):
     angle_range = np.deg2rad(p.angle_range)
     m_stg = np.linspace(np.tan(expected_angle-angle_range),np.tan(expected_angle+angle_range), p.num_angles)
     b = np.linspace(expected_b-b_range, expected_b+b_range, p.num_bs, dtype=int)
-    delta_b = int(np.floor(p.line_wdt/2/np.cos(2*np.pi*expected_angle/360))) ##np.rad..
-    y_pts = (2*delta_b+1)
 
+    delta_b = int(abs(np.floor((p.line_wdt/2)/np.cos(expected_angle)))) #delta sollte positiv sein deswegen mal abs
+    y_pts = (2*delta_b+1)
 
     num_lines = len(b)*len(m_stg)
     score = np.empty([num_lines])
 
-
-    prob_lines = np.empty([num_lines,2, (2*delta_b+1)*width], int) 
+    print([num_lines,2 ,y_pts])
+    prob_lines = np.empty(shape=[num_lines,2 ,y_pts*width], dtype=int) 
     all_bs = np.empty([num_lines])
     all_ms =np.empty([num_lines])
     line_lengths = np.empty([num_lines])
@@ -77,10 +78,10 @@ def build_probe_lines(frame, expected_angle, rescale_factor):
                         prob_lines[line_idx][1][j_idx] = 0
                         x_limits[line_idx][0] = j_idx
                     if prob_lines[line_idx][1][j_idx] > height-1:
-                        prob_lines[line_idx][1][j_idx] = height[1]-1
+                        prob_lines[line_idx][1][j_idx] = height-1
                         if x_limits[line_idx][1] == 0:
                             x_limits[line_idx][1] = j_idx
-            
+            #print(x_limits[line_idx][1])
             # If exit point is has not been defined
             if x_limits[line_idx][1] == 0:
                 x_limits[line_idx][1] = j_idx
@@ -93,8 +94,9 @@ def build_probe_lines(frame, expected_angle, rescale_factor):
                                              prob_lines[line_idx][0][x_limits[line_idx][0]])**2+
                                             (prob_lines[line_idx][1][x_limits[line_idx][1]]-
                                              prob_lines[line_idx][1][x_limits[line_idx][0]])**2)
-            print(prob_lines[line_idx][0][x_limits[line_idx][1]], prob_lines[line_idx][0][x_limits[line_idx][0]])                               
-                                 
+
+            #print(prob_lines[line_idx][0][x_limits[line_idx][-1]], prob_lines[line_idx][0][x_limits[line_idx][0]])                               
+                      
     return prob_lines, num_lines, all_bs, all_ms, delta_b, y_pts, line_lengths, x_limits
     
 ##############################################################################################################
@@ -104,10 +106,12 @@ def build_probe_lines(frame, expected_angle, rescale_factor):
   # Line probing
 
 def line_detector(frame_filtered, num_lines, prob_lines, x_limits, line_lengths, y_pts, delta_b, all_bs, rescale_factor, frame_raw):
-    score = np.empty([num_lines])
-    for j in range(0, num_lines):
-        score[j] = np.sum(frame_filtered[prob_lines[j][1][x_limits[j][0]:x_limits[j][1]],prob_lines[j][0][x_limits[j][0]:x_limits[j][1]]])/line_lengths[j]           
 
+    #score = np.empty([num_lines])
+    #for j in range(0, num_lines-1):
+    #    score[j] = np.sum(frame_filtered[prob_lines[j][1][x_limits[j][0]:x_limits[j][1]], prob_lines[j][0][x_limits[j][0]:x_limits[j][1]]])/line_lengths[j] 
+
+    score = np.array([np.sum(frame_filtered[prob_lines[j][1][x_limits[j][0]:x_limits[j][1]], prob_lines[j][0][x_limits[j][0]:x_limits[j][1]]], axis=1)/line_lengths[j] for j in range(0, len(prob_lines))])
     # Calc minimum score for a line to be drawn. The score reference is based on the average of the values bewteen the second and fourth quintile.
     q = np.quantile(score, [0.2, 0.4, 0.6, 0.8, 1])
     middle_q = score[(score >= q[1]) & (score <= q[3])]
