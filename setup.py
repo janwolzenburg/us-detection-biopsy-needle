@@ -11,7 +11,9 @@ setup(
         'numpy',
         'scipy',
         'matplotlib',
-	'opencv-python'
+        'scikit-image',
+	    'opencv-python',
+        'astropy'
     ],
    # package_data={'all_sky_cloud_detection': ['resources/hipparcos.fits.gz']},
    # setup_requires=['pytest-runner'],
