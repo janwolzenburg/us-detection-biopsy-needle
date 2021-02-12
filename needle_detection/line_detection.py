@@ -3,7 +3,9 @@ import astropy.convolution as ascon
 from scipy import ndimage, signal
 from skimage import draw
 import needle_detection.parameters as p
-
+from needle_detection.plotting import get_draw_line
+from needle_detection.tip_detection import find_tip
+import time
 """
 description
     builds the lines for probing.
@@ -106,43 +108,42 @@ def build_probe_lines(frame, angle, rescale_factor):
 
   # Line probing
 
-def line_detector(frame_filtered, num_lines, prob_lines, x_limits, line_lengths, y_pts, delta_b, all_bs, rescale_factor, frame_raw):
+def line_detector(frame_filtered, num_lines, prob_lines, x_limits, line_lengths, y_pts, delta_b, rescale_factor, frame_raw, all_bs, all_ms):
 
-    score = np.empty([num_lines])     
     #frame_filtered: array mit (182, 200)
     #num_lines: int 64
     #prob lines: array mit (64, 2, 3840) → prob_lines[0]: array aus 2 arrays (shape 2, 3840), prob_lines[0][1]: array mit 3840
     #x_limits: array mit (64, 2) → x_limits[0]: [   0 3839], x_limits[0][1]: 3839
     #line_lengths: (64,) → line_lengths[j] : 1411.8941178431194
 
-    for j in range(0, num_lines):
-        score[j] = np.sum(frame_filtered[prob_lines[j][1][x_limits[j][0]:x_limits[j][1]], prob_lines[j][0][x_limits[j][0]:x_limits[j][1]]])/line_lengths[j] 
+    score  = [np.sum(frame_filtered[prob_lines[j][1][x_limits[j][0]:x_limits[j][1]], prob_lines[j][0][x_limits[j][0]:x_limits[j][1]]])/line_lengths[j]  for j in range(0, num_lines)]
+    score = np.asarray(score)
 
     q = np.quantile(score, [0.2, 0.4, 0.6, 0.8, 1])
     middle_q = score[(score >= q[1]) & (score <= q[3])]
     score_ref = p.score_thres*np.mean(middle_q)-20
 
     score_max_idx = np.argmax(score)
-    print('ref',score_ref)
-    print(score[score_max_idx])
-    if score[score_max_idx] >= score_ref:
-        print('yeay')
 
+    if score[score_max_idx] >= score_ref:
+        
         # Find needle tip
-        diff_min_x, diff_min_y = find_tip(frame_filtered, prob_lines[score_max_idx], window_size, width, y_pts, delta_b)
+        diff_min_x, diff_min_y, intensity_along_line, intensity_along_line_diff= find_tip(frame_filtered, prob_lines[score_max_idx], y_pts, delta_b)
         # line
         line_b = round(all_bs[score_max_idx]/rescale_factor)
         line_m = all_ms[score_max_idx]
         line_y, line_x = get_draw_line(line_b, line_m, frame_raw.shape)
 
         # tip
-       # tip_x = int(round(diff_min_x/rescale_factor))
-       # tip_y = int(round(diff_min_y/rescale_factor))
-       # circle_y, circle_x = draw.disk([tip_y, tip_x], 12)
+        tip_x = int(round(diff_min_x/rescale_factor))
+        tip_y = int(round(diff_min_y/rescale_factor))
+        #circle_y, circle_x = draw.disk([tip_y, tip_x], 12)
         # Draw
-       # for t in range(-3, 3):
-       #     frame_raw[line_y+t, line_x] = 255
-       # frame_raw[circle_y, circle_x] = 255
-       # print("Found axis and tip in frame", loop_ctr,"with line score of", round(score[score_max_idx],2))
-    else:
-        print("No needle found")
+        #for t in range(-3, 3):
+        #    frame_raw[line_y+t, line_x] = 255
+        #frame_raw[circle_y, circle_x] = 255
+        #print("Found axis and tip in frame", loop_ctr,"with line score of", round(score[score_max_idx],2))
+
+    return line_b, line_m, line_x, line_y, tip_x, tip_y, intensity_along_line, intensity_along_line_diff
+    #else:
+     #   print("No needle found")
