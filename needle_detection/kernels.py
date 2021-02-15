@@ -3,7 +3,7 @@ import astropy.convolution as ascon
 from scipy import ndimage, signal
 from skimage import draw
 import needle_detection.parameters as p
-from needle_detection.preprocessing import normal
+import matplotlib.pyplot as plt
 
 """
 description
@@ -80,7 +80,6 @@ def build_sobel_kernel(n, angle):
 
 def filtering(frame, kernel):
     frame = ndimage.convolve(frame, kernel)
-    frame = normal(frame, np.uint8)
     return frame
 
 

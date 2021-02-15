@@ -1,5 +1,4 @@
-from needle_detection.read_frames import read_frame
-from needle_detection.preprocessing import normal, get_ROI
+from needle_detection.preprocessing import read_frame, get_ROI
 from needle_detection.kernels import filter_kernel_parameters, build_gauss_kernel, build_sobel_kernel, convolve_kernels, filtering
 from needle_detection.line_detection import line_detector, build_probe_lines
 import matplotlib.pyplot as plt
@@ -9,9 +8,9 @@ from skimage.draw import disk, line
 angle = p.angles[4]
 
 
-frame = read_frame('../needle_detection/resources/test/63.png')
+frame = read_frame('../needle_detection/resources/test/30.png')
 sigma_x, sigma_y, n = filter_kernel_parameters(frame)   ##hier noch umbauen, sodass das vor einlesen (jedes) frames geschieht
-
+print(type(frame[0,0]))
 gauss_kernel = build_gauss_kernel(sigma_x, sigma_y, angle)
 sobel_kernel =  build_sobel_kernel(n, angle)
 convolved_kernels = convolve_kernels(sobel_kernel, gauss_kernel)
@@ -20,11 +19,9 @@ convolved_kernels = convolve_kernels(sobel_kernel, gauss_kernel)
 
 ROI, rescale_factor = get_ROI(frame, angle)
 filtered_frame = filtering(ROI, convolved_kernels)
-normalized_frame = normal(filtered_frame)
-#plt.imshow(filtered_frame, cmap='gray')
-#plt.show()
 
-prob_lines, num_lines, all_bs, all_ms, delta_b, y_pts, line_lengths, x_limits = build_probe_lines(normalized_frame, angle, rescale_factor)
+
+prob_lines, num_lines, all_bs, all_ms, delta_b, y_pts, line_lengths, x_limits = build_probe_lines(filtered_frame, angle, rescale_factor)
 
 line_b, line_m, line_x, line_y, tip_x, tip_y, intensity_along_line, intensity_along_line_diff, diff_min_x, diff_min_y = line_detector(frame, num_lines, prob_lines, x_limits, line_lengths, y_pts, delta_b, rescale_factor, frame, all_bs, all_ms)
 
@@ -44,5 +41,6 @@ for t in range(-3, 3):
 f, (ax1, ax2) = plt.subplots(nrows=1, ncols=2, figsize=(10,6))
 ax1.imshow(frame, cmap='gray')
 ax2.imshow(filtered_frame, cmap='gray')
+plt.savefig('172_line.png', dpi=300)
 plt.show()
 plt.close()

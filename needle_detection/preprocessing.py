@@ -2,24 +2,10 @@ import numpy as np
 #import RPi.GPIO as gpio
 import needle_detection.parameters as p
 from skimage import transform
-"""
-description
-    Normalizes a frame to a range from 0 to 255
-        
-arguments
-    frame       2D array
-    out_type    type of returned normalized frame
+import matplotlib.pyplot as plt
 
-returns
-    normalized frame with given type
-    
-"""
-def normal(frame, out_type=np.uint8):
-    frame_min = np.amin(frame)
-    frame_max = np.amax(frame)
-    k = 255/(frame_max - frame_min)
-    frame = (frame - frame_min)*k
-    return frame.astype(out_type)
+import cv2 as cv
+
 
 #def get_angle_from_pi():
 #    gpio.setmode(gpio.BOARD)
@@ -42,6 +28,39 @@ def normal(frame, out_type=np.uint8):
 #                 break
 #    return
 
+
+#def read_cam(channel=0):
+#    cap = cv2.VideoCapture(channel)
+#    cap.open(channel)
+#    cap.set(cv2.CAP_PROP_FRAME_WIDTH, p.image_size_x)
+#    cap.set(cv2.CAP_PROP_FRAME_HEIGHT, p.image_size_y)
+#    print("Capture device opened!")#
+
+                # Get image and crop to ROI
+#            ret, frame = cap.read()
+#            if ret == False:
+#                print("Video grabber disconnected!")
+#                exit
+#    return
+
+
+"""Reads in and normalizes single frame in range(0,255)
+
+Parameters
+----------
+path : str
+    The file location of the frame 
+
+Returns
+-------
+numpy.ndarray
+    normalized gray-scale image
+"""
+
+def read_frame(path):
+    frame = cv.imread(path, cv.IMREAD_GRAYSCALE)
+    norm = cv.normalize(frame, None, alpha=0, beta=255, norm_type=cv.NORM_MINMAX, dtype=cv.CV_32F)
+    return norm
 
 
 def get_ROI(frame, expected_angle):
