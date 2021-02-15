@@ -73,7 +73,7 @@ def build_sobel_kernel(n, angle):
     kernsob_kernel: numpy.ndarray
         sobel filter kernel
     """
-    print(n, type(n))
+
     np.pi/2-np.deg2rad(angle)  
     n_3 = int(n/3)
     sob_kernel = np.zeros([n,n])
