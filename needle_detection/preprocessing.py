@@ -3,9 +3,7 @@ import numpy as np
 import needle_detection.parameters as p
 from skimage import transform
 import matplotlib.pyplot as plt
-
 import cv2 as cv
-
 
 #def get_angle_from_pi():
 #    gpio.setmode(gpio.BOARD)
@@ -44,31 +42,52 @@ import cv2 as cv
 #    return
 
 
-"""Reads in and normalizes single frame in range(0,255)
-
-Parameters
-----------
-path : str
-    The file location of the frame 
-
-Returns
--------
-numpy.ndarray
-    normalized gray-scale image
-"""
 
 def read_frame(path):
+    """
+    Reads in and normalizes single frame in range(0,255)
+
+    Parameters
+    ----------
+    path : str
+        The file location of the frame 
+
+    Returns
+    -------
+    numpy.ndarray
+        normalized gray-scale image
+    """
+
     frame = cv.imread(path, cv.IMREAD_GRAYSCALE)
     norm = cv.normalize(frame, None, alpha=0, beta=255, norm_type=cv.NORM_MINMAX, dtype=cv.CV_32F)
+    
     return norm
 
 
-def get_ROI(frame, expected_angle):
+def get_ROI(frame, angle):
+    """
+    Defines ROI in given frame
+
+    Parameters
+    ----------
+    frame : numpy.ndarray
+    angle: int
+         Angel in degrees of the needle holder measuered with respect to 'vertical' transducer axis
+
+    Returns
+    -------
+    frame_roi : numpy.ndarray
+        ROI of given frame 
+    rescale_factor: float
+        xxx
+    """
+
     width = p.roi_x_2 - p.roi_x_1
     height = p.roi_y_2 - p.roi_y_1
 
-    dist_per_pixel = p.depth/height                                     # Distance in cm per Pixel
-    expected_angle = np.pi/2-np.deg2rad(expected_angle)                 # Recalc expected angle so it is measured with respect to the x-axis    # Resize Parameters----------------------------
+    dist_per_pixel = p.depth/height     # Distance in cm per Pixel
+    angle = np.pi/2-np.deg2rad(angle)   # Recalc expected angle so it is measured with respect to the x-axis   
+    
     # Calculate new image size 
     if width <= height:
         new_height = p.processing_size
@@ -84,4 +103,5 @@ def get_ROI(frame, expected_angle):
     wdt_hgt_ref = np.sqrt(width**2+height**2) 
     frame_raw = frame[p.roi_y_1:p.roi_y_2, p.roi_x_1:p.roi_x_2]
     frame_roi = transform.resize(frame_raw, (height, width))
+    
     return frame_roi, rescale_factor

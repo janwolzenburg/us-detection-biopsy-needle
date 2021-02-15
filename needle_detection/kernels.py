@@ -4,20 +4,26 @@ from scipy import ndimage, signal
 from skimage import draw
 import needle_detection.parameters as p
 import matplotlib.pyplot as plt
-
-"""
-description
-    Build the rotated anisotropic gaussian filter kernel
-    
-arguments
-    sigma_x     sigma in x-direction
-    sigma_y     sigma in y-direction
-    angle       clockwise rotation angle in radians
      
-returns
-    kernel      roteted filter kernel
-"""
 def build_gauss_kernel(sigma_x, sigma_y, angle):
+    """
+    Build the rotated anisotropic gaussian filter kernel
+
+    Parameters
+    ----------
+    sigma_x : numpy.float64
+        sigma in x-direction
+    sigma_y: numpy.float64
+        sigma in y-direction
+    angle: int
+         angle in degrees of the needle holder measuered with respect to 'vertical' transducer axis
+
+    Returns
+    -------
+    kernel: numpy.ndarray
+        roteted filter kernel 
+    """
+
     angle = np.pi/2-np.deg2rad(angle)  
     # Calculate gaussian kernel
     kernel = ascon.Gaussian2DKernel(sigma_x, sigma_y, 0)
@@ -50,21 +56,24 @@ def build_gauss_kernel(sigma_x, sigma_y, angle):
 
     return kernel
 
-##############################################################################################################
-##############################################################################################################
 
-"""
-description
-    Build rotated sobel kernel
-    
-arguments
-    n       size of sobel kernel. Must be a multiple of three
-    angle   clockwise rotation angle in radians
-returns
-    sob_kernel  sobel filter kernel
-    
-"""
 def build_sobel_kernel(n, angle):
+    """
+    Build the rotated sobel kernel
+
+    Parameters
+    ----------
+    n: int
+        size of sobel kernel. Must be a multiple of three
+    angle: int
+         angle in degrees of the needle holder measuered with respect to 'vertical' transducer axis
+
+    Returns
+    -------
+    kernsob_kernel: numpy.ndarray
+        sobel filter kernel
+    """
+    print(n, type(n))
     np.pi/2-np.deg2rad(angle)  
     n_3 = int(n/3)
     sob_kernel = np.zeros([n,n])
@@ -74,27 +83,51 @@ def build_sobel_kernel(n, angle):
 
     return sob_kernel
     
-##############################################################################################################
-##############################################################################################################
 
+def convolution(array_1, array_2):
+    """
+    Convolution of two arrays
 
-def filtering(frame, kernel):
-    frame = ndimage.convolve(frame, kernel)
-    return frame
+    Parameters
+    ----------
+    array_1: numpy.ndarray
+        x
+    array_2: numpy.ndarray
+         x
 
+    Returns
+    -------
+    convolved_array: numpy.ndarray
+        convolved kernel
+    """
 
-def convolve_kernels(kernel_1, kernel_2):
-    #kernel = build_gauss_kernel(sigma_x, sigma_y, expected_angle)
+    convolved_array = ndimage.convolve(array_1, array_2)
 
-    # Build rotated Sobel
-    #sob_kernel = build_sobel_kernel(sob_kernel_size, expected_angle);
-    kernel = ndimage.convolve(kernel_1, kernel_2)
-    return kernel
-
+    return convolved_array
 
 def filter_kernel_parameters(frame, value=12):
+    """
+    Finding ilter kernel parameters for smoothing and edge improvement
+
+    Parameters
+    ----------
+    frame: numpy.ndarray
+        x
+    value: numpy.ndarray
+         x, default 12
+
+    Returns
+    -------
+     sigma_x : numpy.float64
+        sigma in x-direction
+    sigma_y: numpy.float64
+        sigma in y-direction
+    sob_kernel_size: int
+        size of sobel kernel. Must be a multiple of three
+    """
     wdt_hgt_ref = np.sqrt((np.shape(frame)[0])**2+(np.shape(frame)[1])**2)
     sigma_x = wdt_hgt_ref/75                                            # Sigma x of gaussian kernel
     sigma_y = sigma_x/p.kernel_aspect_ratio                             # Sigma y
     sob_kernel_size = int(value)   
+
     return sigma_x, sigma_y, sob_kernel_size

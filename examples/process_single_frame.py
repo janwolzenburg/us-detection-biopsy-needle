@@ -1,5 +1,5 @@
 from needle_detection.preprocessing import read_frame, get_ROI
-from needle_detection.kernels import filter_kernel_parameters, build_gauss_kernel, build_sobel_kernel, convolve_kernels, filtering
+from needle_detection.kernels import filter_kernel_parameters, build_gauss_kernel, build_sobel_kernel, convolution
 from needle_detection.line_detection import line_detector, build_probe_lines
 import matplotlib.pyplot as plt
 import numpy as np
@@ -13,12 +13,12 @@ sigma_x, sigma_y, n = filter_kernel_parameters(frame)   ##hier noch umbauen, sod
 print(type(frame[0,0]))
 gauss_kernel = build_gauss_kernel(sigma_x, sigma_y, angle)
 sobel_kernel =  build_sobel_kernel(n, angle)
-convolved_kernels = convolve_kernels(sobel_kernel, gauss_kernel)
+convolved_kernels = convolution(sobel_kernel, gauss_kernel)
 
 
 
 ROI, rescale_factor = get_ROI(frame, angle)
-filtered_frame = filtering(ROI, convolved_kernels)
+filtered_frame = convolution(ROI, convolved_kernels)
 
 
 prob_lines, num_lines, all_bs, all_ms, delta_b, y_pts, line_lengths, x_limits = build_probe_lines(filtered_frame, angle, rescale_factor)
