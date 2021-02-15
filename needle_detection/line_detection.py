@@ -125,7 +125,7 @@ def line_detector(frame_filtered, num_lines, prob_lines, x_limits, line_lengths,
 
     score_max_idx = np.argmax(score)
 
-    if score[score_max_idx] >= score_ref:
+    if score[score_max_idx] >= score_ref-50:
         
         # Find needle tip
         diff_min_x, diff_min_y, intensity_along_line, intensity_along_line_diff= find_tip(frame_filtered, prob_lines[score_max_idx], y_pts, delta_b)
@@ -144,6 +144,6 @@ def line_detector(frame_filtered, num_lines, prob_lines, x_limits, line_lengths,
         #frame_raw[circle_y, circle_x] = 255
         #print("Found axis and tip in frame", loop_ctr,"with line score of", round(score[score_max_idx],2))
 
-    return line_b, line_m, line_x, line_y, tip_x, tip_y, intensity_along_line, intensity_along_line_diff
+    return line_b, line_m, line_x, line_y, tip_x, tip_y, intensity_along_line, intensity_along_line_diff, diff_min_x, diff_min_y
     #else:
      #   print("No needle found")

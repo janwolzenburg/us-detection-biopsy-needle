@@ -47,7 +47,6 @@ def normal(frame, out_type=np.uint8):
 def get_ROI(frame, expected_angle):
     width = p.roi_x_2 - p.roi_x_1
     height = p.roi_y_2 - p.roi_y_1
-    print(width, height)
 
     dist_per_pixel = p.depth/height                                     # Distance in cm per Pixel
     expected_angle = np.pi/2-np.deg2rad(expected_angle)                 # Recalc expected angle so it is measured with respect to the x-axis    # Resize Parameters----------------------------
@@ -62,6 +61,7 @@ def get_ROI(frame, expected_angle):
         new_height = round(rescale_factor*height)
     width = new_width
     height = new_height
+
     wdt_hgt_ref = np.sqrt(width**2+height**2) 
     frame_raw = frame[p.roi_y_1:p.roi_y_2, p.roi_x_1:p.roi_x_2]
     frame_roi = transform.resize(frame_raw, (height, width))

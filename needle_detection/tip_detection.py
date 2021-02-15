@@ -2,7 +2,7 @@ import numpy as np
 import astropy.convolution as ascon
 from scipy import ndimage, signal
 from skimage import draw
-
+import needle_detection.parameters as p
 
 """
 description
@@ -22,8 +22,10 @@ returns
 
    
 """
-def find_tip(frame, prob_line, window_size, width, y_pts, delta_b):
-    
+def find_tip(frame, prob_line, y_pts, delta_b):
+    window_size = int(p.window_size_div/2-1)
+    width = int(np.shape(frame)[1])
+
     intensity_along_line = np.zeros([width], float)
     
     # Iterate over each x-value in range given by moving window size
@@ -57,4 +59,4 @@ def find_tip(frame, prob_line, window_size, width, y_pts, delta_b):
     diff_min_x = prob_line[0][y_pts*diff_min_idx+delta_b]
     diff_min_y = prob_line[1][y_pts*diff_min_idx+delta_b]
     
-    return diff_min_x, diff_min_y
+    return diff_min_x, diff_min_y, intensity_along_line, intensity_along_line_diff

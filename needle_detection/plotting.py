@@ -56,4 +56,4 @@ def plotting_tip(diff_min_x, diff_min_y):
     frame_raw[circle_y, circle_x] = 1
     return 
 
-    def plot_lines()
+#def plot_lines():
