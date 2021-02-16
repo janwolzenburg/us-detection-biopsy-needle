@@ -21,21 +21,12 @@ arguments
     
     line_wdt            the width of the probing lines 
     frame_width         the width (x-size) of the frame
-    frame_height        the height (y-size) of the frame
-returns
-    prob_lines          the multidimensional array that holds the lines. Indexing is: [line number][x(0) or y(1) value][pixel index]
-    num_lines           amount of lines
-    all_bs              array that holds all y-intersects
-    all_ms              array that holds all inclines
-    delta_b             projection of half line width to the y-axis
-    y_pts               number of pixels in projection of line width
-    line_lengths        lengths of all lines
-    x_limits            limits where the line enters and exits the ...
+    frame_height        the height (y-size) of the frame     
     
 """
 def build_probe_lines(frame, angle, rescale_factor):
     """
-    Build the rotated anisotropic gaussian filter kernel
+    Build probing lines for needle detection
 
     Parameters
     ----------
@@ -48,9 +39,24 @@ def build_probe_lines(frame, angle, rescale_factor):
 
     Returns
     -------
-    kernel: numpy.ndarray
-        roteted filter kernel 
+    prob_lines: numpy.ndarray #(64, 2, 600) 
+        the multidimensional array that holds the lines. Indexing is: [line number][x(0) or y(1) value][pixel index]
+    num_lines: int 
+        amount of lines
+    all_bs: numpy.ndarray #(64,)
+        array that holds all y-intersects
+    all_ms: numpy.ndarray #(64,)
+        array that holds all inclines
+    delta_b: int
+        projection of half line width to the y-axis
+    y_pts: int
+        number of pixels in projection of line width
+    line_lengths: numpy.ndarray #(64,)
+        lengths of all lines
+    x_limits: numpy.ndarray #(64, 2)
+        limits where the line enters and exits the ...
     """
+
 
     # Probing lines
     # b -> Pixel value where the needle enters the picture
@@ -116,23 +122,64 @@ def build_probe_lines(frame, angle, rescale_factor):
                                             (prob_lines[line_idx][1][x_limits[line_idx][1]]-
                                              prob_lines[line_idx][1][x_limits[line_idx][0]])**2)
 
-            #print(prob_lines[line_idx][0][x_limits[line_idx][-1]], prob_lines[line_idx][0][x_limits[line_idx][0]])                               
-            
+            #print(prob_lines[line_idx][0][x_limits[line_idx][-1]], prob_lines[line_idx][0][x_limits[line_idx][0]])       
+                    
+
     return prob_lines, num_lines, all_bs, all_ms, delta_b, y_pts, line_lengths, x_limits
     
-##############################################################################################################
-##############################################################################################################
 
-
-  # Line probing
 
 def line_detector(frame_filtered, num_lines, prob_lines, x_limits, line_lengths, y_pts, delta_b, rescale_factor, frame_raw, all_bs, all_ms):
+    """
+    Build probing lines for needle detection
 
-    #frame_filtered: array mit (182, 200)
-    #num_lines: int 64
-    #prob lines: array mit (64, 2, 3840) → prob_lines[0]: array aus 2 arrays (shape 2, 3840), prob_lines[0][1]: array mit 3840
-    #x_limits: array mit (64, 2) → x_limits[0]: [   0 3839], x_limits[0][1]: 3839
-    #line_lengths: (64,) → line_lengths[j] : 1411.8941178431194
+    Parameters
+    ----------
+    frame_filtered : numpy.ndarray
+        filtered ROI of original frame
+    frame_raw : numpy.ndarray
+        original frame
+    prob_lines: numpy.ndarray #(64, 2, 600) 
+        the multidimensional array that holds the lines. Indexing is: [line number][x(0) or y(1) value][pixel index]
+    num_lines: int 
+        amount of lines
+    all_bs: numpy.ndarray #(64,)
+        array that holds all y-intersects
+    all_ms: numpy.ndarray #(64,)
+        array that holds all inclines
+    delta_b: int
+        projection of half line width to the y-axis
+    y_pts: int
+        number of pixels in projection of line width
+    line_lengths: numpy.ndarray #(64,)
+        lengths of all lines
+    x_limits: numpy.ndarray #(64, 2)
+        limits where the line enters and exits the ...
+    rescale_factor: 
+
+    Returns
+    -------
+    line_b: int
+        the multidimensional array that holds the lines. Indexing is: [line number][x(0) or y(1) value][pixel index]
+    line_m: numpy.float64 
+        amount of lines
+    line_x: numpy.ndarray 
+        array that holds all y-intersects
+    line_y: numpy.ndarray 
+        array that holds all inclines
+    tip_x: int
+        projection of half line width to the y-axis
+    tip_y: int
+        number of pixels in projection of line width
+    intensity_along_line: numpy.ndarray
+        lengths of all lines
+    intensity_along_line_diff: numpy.ndarray 
+        limits where the line enters and exits the ...
+    diff_min_x: numpy.int64
+        lengths of all lines
+    diff_min_y: numpy.int64
+        limits where the line enters and exits the ...
+    """
 
     score  = [np.sum(frame_filtered[prob_lines[j][1][x_limits[j][0]:x_limits[j][1]], prob_lines[j][0][x_limits[j][0]:x_limits[j][1]]])/line_lengths[j]  for j in range(0, num_lines)]
     score = np.asarray(score)
@@ -155,6 +202,7 @@ def line_detector(frame_filtered, num_lines, prob_lines, x_limits, line_lengths,
         # tip
         tip_x = int(round(diff_min_x/rescale_factor))
         tip_y = int(round(diff_min_y/rescale_factor))   
+
     return line_b, line_m, line_x, line_y, tip_x, tip_y, intensity_along_line, intensity_along_line_diff, diff_min_x, diff_min_y
     #else:
      #   print("No needle found")
