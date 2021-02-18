@@ -10,7 +10,7 @@ depth = 3.5                                                 # Depth of picture i
 
 # Needle -> processing only valid for angles which enter the picture at x = 0 and has positive incline (y value rises with x value)
 angles =            [   20, 30, 40, 50, 60, 70]           # Angels of the needle holder measuered with respect to 'vertical' transducer axis
-insertion_depths =  [    2,  1,  1,  1,  1,  1]           # Depth (in cm) at which the insterted needle appears in the image. May be depending on the selected angle
+insertion_depths =  [    3,  1,  1,  1,  1,  1]           # Depth (in cm) at which the insterted needle appears in the image. May be depending on the selected angle
 channels =          [7, 11, 12, 13, 15, 16, 18]           # Channels of the 'angle-change' button and conducting loops
 
 

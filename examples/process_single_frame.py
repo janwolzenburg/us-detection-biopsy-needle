@@ -18,8 +18,6 @@ sobel_kernel =  build_sobel_kernel(n, angle)
 convolved_kernels = convolution(sobel_kernel, gauss_kernel)
 
 
-
-ROI, rescale_factor = get_ROI(frame, angle)
 filtered_frame = convolution(ROI, convolved_kernels)
 
 
@@ -35,9 +33,6 @@ frame[circle_y, circle_x] = 255
 
 for t in range(-3, 3):
         frame[line_y+t, line_x] = 255
-#rr, cc = line(line_y[0], line_x[0], line_y[len(line_y)-1],line_y[len(line_x)-1])
-#frame[rr, cc] = 255
-
 
 
 f, (ax1, ax2) = plt.subplots(nrows=1, ncols=2, figsize=(10,6))

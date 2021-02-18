@@ -1,10 +1,69 @@
 import numpy as np
 import astropy.convolution as ascon
 from scipy import ndimage, signal
-from skimage import draw
+from skimage import draw, feature
+from skimage.filters import gabor
+import cv2 as cv
 import needle_detection.parameters as p
 import matplotlib.pyplot as plt
-     
+
+def gabor_kernel(frame, angle, freq = 1, sigma_x=5, sigma_y=5):
+    """
+    Filter single frame with gabor filter
+
+    Parameters
+    ----------
+    frame: numpy.ndarray
+        cropped image
+    freq: float
+        Spatial frequency of the harmonic function. Specified in pixels.
+    sigma_x, sigma_y: numpy.float64
+        Standard deviation in x- and y-directions. These directions apply to the kernel before rotation.
+         If theta = pi/2, then the kernel is rotated 90 degrees so that sigma_x controls the vertical direction.
+    angle: float
+         angle in degrees of the needle holder measuered with respect to 'vertical' transducer axis
+        Orientation in radians. If 0, the harmonic is in the x-direction.
+
+    Returns
+    -------
+    img: numpy.ndarray
+        Filtered images using the real part of the Gabor filter kernel. Image is of the same dimensions as the input one.
+
+
+    """
+    img = gabor(frame, frequency=freq, theta=np.deg2rad(angle), sigma_x=5, sigma_y=5)[0]
+    return img
+
+def canny_edge_detection(frame, sigma=1, low_threshold=1, high_threshold=50, mask=None):
+    """
+    Filter single frame with canny edge detector
+
+    Parameters
+    ----------
+    frame: numpy.ndarray
+        The greyscale input image to detect edges on (should be normalized to 0.0 to 1.0)., cropped frame
+    sigma: float
+        The standard deviation of the Gaussian filter
+        
+    low_threshold : float
+        The lower bound for hysterisis thresholding (linking edges), default=1
+    high_threshold : float  
+        The upper bound for hysterisis thresholding (linking edges), default=50
+    mask : array, dtype=bool, optional
+        An optional mask to limit the application of Canny to a certain area.
+
+    Returns :	
+    -------
+
+    edges : numpy.ndarray
+        The binary edge map.
+    """
+    edges = cv.Canny(frame,sigma, high_threshold,low_threshold, mask)
+    return edges
+
+
+
+
 def build_gauss_kernel(sigma_x, sigma_y, angle):
     """
     Build the rotated anisotropic gaussian filter kernel

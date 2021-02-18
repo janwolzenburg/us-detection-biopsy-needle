@@ -43,7 +43,7 @@ import cv2 as cv
 
 
 
-def read_frame(path):
+def read_frame(path, alpha=0, beta=255):
     """
     Reads in and normalizes single frame in range(0,255)
 
@@ -59,9 +59,19 @@ def read_frame(path):
     """
 
     frame = cv.imread(path, cv.IMREAD_GRAYSCALE)
-    norm = cv.normalize(frame, None, alpha=0, beta=255, norm_type=cv.NORM_MINMAX, dtype=cv.CV_32F)
+    norm = cv.normalize(frame, None, alpha, beta, norm_type=cv.NORM_MINMAX, dtype=cv.CV_32F)
     
     return norm
+
+
+#def roi(frame, vertices):
+    #blank mask:
+ #   mask = np.zeros_like(img)
+    # fill the mask
+ #   cv.fillPoly(mask, vertices, 255)
+    # now only show the area that is the mask
+#    masked = cv.bitwise_and(img, mask)
+#    return masked
 
 
 def get_ROI(frame, angle):

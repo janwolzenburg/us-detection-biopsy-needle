@@ -120,10 +120,7 @@ def build_probe_lines(frame, angle, rescale_factor):
             line_lengths[line_idx] = np.sqrt((prob_lines[line_idx][0][x_limits[line_idx][1]]-
                                              prob_lines[line_idx][0][x_limits[line_idx][0]])**2+
                                             (prob_lines[line_idx][1][x_limits[line_idx][1]]-
-                                             prob_lines[line_idx][1][x_limits[line_idx][0]])**2)
-
-            #print(prob_lines[line_idx][0][x_limits[line_idx][-1]], prob_lines[line_idx][0][x_limits[line_idx][0]])       
-                    
+                                             prob_lines[line_idx][1][x_limits[line_idx][0]])**2)                   
 
     return prob_lines, num_lines, all_bs, all_ms, delta_b, y_pts, line_lengths, x_limits
     
