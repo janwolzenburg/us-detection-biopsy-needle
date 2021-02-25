@@ -63,7 +63,6 @@ def canny_edge_detection(frame, sigma=1, low_threshold=1, high_threshold=50, mas
 
 
 
-
 def build_gauss_kernel(sigma_x, sigma_y, angle):
     """
     Build the rotated anisotropic gaussian filter kernel

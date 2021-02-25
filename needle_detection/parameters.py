@@ -31,6 +31,9 @@ window_size_div = 50                                        # divider for side l
 angle_range = 5
 
 
+vertices=[[300,100],[1000,100], [1000,500],[300,500]] #für curved array
+
+
 
 #class logiqc5
 #    linear_array

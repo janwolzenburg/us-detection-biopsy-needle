@@ -41,7 +41,32 @@ import cv2 as cv
 #                exit
 #    return
 
+#uhrzeigersinn, startet oben links
+def mask_roi(img, vertices):
+    """
+    Get roi using a mask
 
+    Parameters
+    ----------
+    img : numpy.ndarray
+        Frame of us image
+    vertices: numpy.ndarray
+        Vertices characterize the polynomial, defined in parameters.py
+    Returns
+    -------
+    numpy.ndarray
+        masked input image
+    """
+    #blank mask:
+    mask = np.zeros_like(img)
+
+    # fill the mask
+    #cv.fillPoly(mask, vertices, 255)
+    cv.fillConvexPoly(mask, np.array(vertices, 'int32'), 255)
+    # now only show the area that is the mask
+    masked = cv.bitwise_and(img, mask)
+
+    return masked
 
 def read_frame(path, alpha=0, beta=255):
     """

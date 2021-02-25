@@ -6,24 +6,7 @@ import needle_detection.parameters as p
 from needle_detection.plotting import get_draw_line
 from needle_detection.tip_detection import find_tip
 import time
-"""
-description
-    builds the lines for probing.
-    
-arguments
-    angle      the expected insertion angle with respect to x-axis in degrees
-    angle range         the angle range in which lines will be build
-    num_angles          the amount of lines in range
-    
-    expected_b          the expected y-position the needle enters the picture (x = 0)
-    b_range             the range of bs
-    num_bs              the amount of bs in range
-    
-    line_wdt            the width of the probing lines 
-    frame_width         the width (x-size) of the frame
-    frame_height        the height (y-size) of the frame     
-    
-"""
+import cv2 as cv
 def build_probe_lines(frame, angle, rescale_factor):
     """
     Build probing lines for needle detection
@@ -203,3 +186,87 @@ def line_detector(frame_filtered, num_lines, prob_lines, x_limits, line_lengths,
     return line_b, line_m, line_x, line_y, tip_x, tip_y, intensity_along_line, intensity_along_line_diff, diff_min_x, diff_min_y
     #else:
      #   print("No needle found")
+
+     
+def find_houghlinesP(frame):
+    """ 
+    Build probing lines for needle detection
+
+    Parameters
+    ----------
+    frame : numpy.ndarray
+        Image after preprocessing and edge detection
+    threshold: int
+        ..
+    maxLineGap: int
+        maximum allowed distance between two line segments to be recognized as one line
+    minLineLength: int
+        Minimum length that the line must have in order to be recognized as a line.
+    Returns
+    -------
+    lines: numpy.ndarray
+        Array holding starting and ending points of all detected line segments [x1, y1, x2, y2]
+
+    """
+
+    thresL = 100
+    minL = 50
+    maxL = 50
+
+    lines = cv.HoughLinesP(frame, 1, np.pi/360, threshold=thresL, maxLineGap=maxL, minLineLength=minL)
+    #lines = cv.HoughLinesP(image, rho, theta, threshold, maxLineGap, minLineLength)
+    return lines
+
+  
+#def find_houghlines(frame):
+    """ 
+    Build probing lines for needle detection
+
+    Parameters
+    ----------
+    frame : numpy.ndarray
+        Image after preprocessing and edge detection
+    threshold: int
+        ..
+
+    Returns
+    -------
+    lines: numpy.ndarray
+        Array holding starting and ending points of all detected line segments [x1, y1, x2, y2]
+
+    """
+
+
+#    lines = cv.HoughLines(frame, 1,  np.pi/360, threshold = int(3*np.mean(frame)))
+    #lines = cv.HoughLinesP(image, rho, theta, threshold, maxLineGap, minLineLength)
+#    print(lines)
+#    return lines
+
+def average_houghlines(lines):
+    x = []
+    y = []
+    m = []
+    b = []
+    if lines is not None:
+        for i in range(0, len(lines)):
+            rho = lines[i][0][0]
+            theta = lines[i][0][1]
+            if 105 < np.rad2deg(theta) < 110:
+                m0 = np.cos(theta)
+                b0 = np.sin(theta)
+                x0 = m0 * rho
+                y0 = b0 * rho
+                x.append(x0)
+                y.append(y0)
+                m.append(m0)
+                b.append(b0)
+        xx = np.mean(x)
+        yy = np.mean(y)
+        mm = np.mean(m)
+        bb = np.mean(b)
+        pt1 = (int(xx + 1000*(-bb)), int(yy + 1000*(mm)))
+        pt2 = (int(xx - 1000*(-bb)), int(yy - 1000*(mm)))   
+    return pt1, pt2
+
+
+    
